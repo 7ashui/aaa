@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <title>长春工业大学化学工程学院荣誉墙</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* 动画效果 */
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 悬停效果 */
+        button:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+    <!-- 登录模态框 -->
+    <div id="login-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden animate-fade-in">
+        <div class="bg-white p-8 rounded-md shadow-md w-96">
+            <h2 class="text-2xl font-bold mb-4">登录</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">用户名</label>
+                    <input type="text" id="username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">密码</label>
+                    <input type="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">登录</button>
+            </form>
+            <button id="login-modal-back" class="block mt-4 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">返回</button>
+        </div>
+    </div>
+
+    <!-- 查看证书照片模态框 -->
+    <div id="image-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden animate-fade-in">
+        <div class="bg-white p-4 rounded-md shadow-md">
+            <img id="image-modal-img" src="" alt="证书照片" class="max-h-screen max-w-screen">
+            <button id="image-modal-close" class="block mt-4 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">关闭</button>
+        </div>
+    </div>
+
+    <!-- 新增管理账号模态框 -->
+    <div id="add-admin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden animate-fade-in">
+        <div class="bg-white p-8 rounded-md shadow-md w-96">
+            <h2 class="text-2xl font-bold mb-4">新增管理账号</h2>
+            <form id="add-admin-form">
+                <div class="mb-4">
+                    <label for="new-username" class="block text-gray-700 text-sm font-bold mb-2">用户名</label>
+                    <input type="text" id="new-username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="new-password" class="block text-gray-700 text-sm font-bold mb-2">密码</label>
+                    <input type="password" id="new-password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">提交</button>
+            </form>
+            <button id="add-admin-modal-back" class="block mt-4 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">返回</button>
+        </div>
+    </div>
+
+    <!-- 删除管理账号模态框 -->
+    <div id="delete-admin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden animate-fade-in">
+        <div class="bg-white p-8 rounded-md shadow-md w-96">
+            <h2 class="text-2xl font-bold mb-4">删除管理账号</h2>
+            <div id="delete-admin-list"></div>
+            <button id="delete-admin-modal-back" class="block mt-4 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">返回</button>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold">长春工业大学化学工程学院荣誉墙</h1>
+            <div class="md:block hidden">
+                <ul class="flex space-x-4">
+                    <li><a href="#" class="hover:text-blue-600">查询荣誉</a></li>
+                    <li><a href="#" class="hover:text-blue-600">添加荣誉</a></li>
+                    <li><a href="#" id="management-link" class="hover:text-blue-600">管理</a></li>
+                </ul>
+            </div>
+            <div class="md:hidden block">
+                <button id="menu-toggle" class="text-gray-600 focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden bg-white px-4 py-2 animate-fade-in">
+            <ul class="space-y-2">
+                <li><a href="#" class="hover:text-blue-600">查询荣誉</a></li>
+                <li><a href="#" class="hover:text-blue-600">添加荣誉</a></li>
+                <li><a href="#" id="management-mobile-link" class="hover:text-blue-600">管理</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 查询荣誉 -->
+        <section id="query-honor" class="bg-white p-8 rounded-md shadow-md mb-8 animate-fade-in">
+            <h2 class="text-2xl font-bold mb-4">查询荣誉</h2>
+            <form id="query-honor-form" class="flex flex-col md:flex-row md:space-x-4">
+                <div class="mb-4 md:mb-0">
+                    <label for="query-category" class="block text-gray-700 text-sm font-bold mb-2">按年份查询</label>
+                    <select id="query-category" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="all">全部</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="mb-4 md:mb-0">
+                    <label for="query-enrollment-year" class="block text-gray-700 text-sm font-bold mb-2">按入学年级查询</label>
+                    <select id="query-enrollment-year" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="all">全部</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="mb-4 md:mb-0">
+                    <label for="search-input" class="block text-gray-700 text-sm font-bold mb-2">搜索荣誉名称或姓名</label>
+                    <input type="text" id="search-input" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 self-end md:self-center">查询</button>
+            </form>
+            <div id="query-results" class="mt-4">
+                <!-- 查询结果将显示在这里 -->
+            </div>
+        </section>
+
+        <!-- 添加荣誉 -->
+        <section id="add-honor" class="bg-white p-8 rounded-md shadow-md mb-8 hidden animate-fade-in">
+            <h2 class="text-2xl font-bold mb-4">添加荣誉</h2>
+            <form id="add-honor-form">
+                <div class="mb-4">
+                    <label for="honor-name" class="block text-gray-700 text-sm font-bold mb-2">荣誉名称</label>
+                    <input type="text" id="honor-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="honor-category" class="block text-gray-700 text-sm font-bold mb-2">年份</label>
+                    <select id="honor-category" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700 text-sm font-bold mb-2">姓名</label>
+                    <input type="text" id="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="student-id" class="block text-gray-700 text-sm font-bold mb-2">学号</label>
+                    <input type="text" id="student-id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="witness" class="block text-gray-700 text-sm font-bold mb-2">证明人</label>
+                    <input type="text" id="witness" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="honor-image" class="block text-gray-700 text-sm font-bold mb-2">荣誉图片</label>
+                    <input type="file" id="honor-image" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="enrollment-year" class="block text-gray-700 text-sm font-bold mb-2">入学年级</label>
+                    <select id="enrollment-year" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">提交</button>
+            </form>
+        </section>
+
+        <!-- 管理界面 -->
+        <section id="management-section" class="bg-white p-8 rounded-md shadow-md mb-8 hidden animate-fade-in">
+            <h2 class="text-2xl font-bold mb-4">管理界面</h2>
+            <div class="flex space-x-4 mb-4">
+                <button id="add-admin-button" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">新增管理</button>
+                <button id="delete-admin-button" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">删除管理</button>
+                <button id="logout-button" class="bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700">退出</button>
+            </div>
+            <!-- 审核部分 -->
+            <div id="review-part">
+                <h3 class="text-xl font-bold mb-2">审核</h3>
+                <table id="review-table" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">荣誉名称</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">年份</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学号</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">证明人</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">入学年级</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    </tbody>
+                </table>
+            </div>
+            <!-- 管理部分 -->
+            <div id="admin-part" class="mt-8">
+                <h3 class="text-xl font-bold mb-2">管理</h3>
+                <table id="admin-table" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">荣誉名称</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">年份</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学号</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">入学年级</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white shadow-md mt-8">
+        <div class="container mx-auto px-4 py-4 flex justify-center">
+            <p class="text-gray-600">本系统由化学工程学院院团委组织部支持</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const addHonorSection = document.getElementById('add-honor');
+        const queryHonorSection = document.getElementById('query-honor');
+        const managementSection = document.getElementById('management-section');
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const managementLink = document.getElementById('management-link');
+        const managementMobileLink = document.getElementById('management-mobile-link');
+        const addHonorForm = document.getElementById('add-honor-form');
+        const reviewTable = document.getElementById('review-table').getElementsByTagName('tbody')[0];
+        const adminTable = document.getElementById('admin-table').getElementsByTagName('tbody')[0];
+        const queryHonorForm = document.getElementById('query-honor-form');
+        const queryResults = document.getElementById('query-results');
+        const imageModal = document.getElementById('image-modal');
+        const imageModalImg = document.getElementById('image-modal-img');
+        const imageModalClose = document.getElementById('image-modal-close');
+        const addAdminModal = document.getElementById('add-admin-modal');
+        const addAdminForm = document.getElementById('add-admin-form');
+        const deleteAdminModal = document.getElementById('delete-admin-modal');
+        const deleteAdminList = document.getElementById('delete-admin-list');
+        const addAdminButton = document.getElementById('add-admin-button');
+        const deleteAdminButton = document.getElementById('delete-admin-button');
+        const logoutButton = document.getElementById('logout-button');
+
+        let isLoggedIn = false;
+        let pendingHonors = JSON.parse(localStorage.getItem('pendingHonors')) || [];
+        let approvedHonors = JSON.parse(localStorage.getItem('approvedHonors')) || [];
+        let adminAccounts = JSON.parse(localStorage.getItem('adminAccounts')) || [
+            { username: '20241664', password: 'aa567891', isInitial: true }
+        ];
+        let currentUser;
+
+        function saveDataToLocalStorage() {
+            localStorage.setItem('pendingHonors', JSON.stringify(pendingHonors));
+            localStorage.setItem('approvedHonors', JSON.stringify(approvedHonors));
+            localStorage.setItem('adminAccounts', JSON.stringify(adminAccounts));
+        }
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        const navLinks = document.querySelectorAll('nav ul li a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.textContent.trim();
+                if (target === '查询荣誉') {
+                    addHonorSection.classList.add('hidden');
+                    queryHonorSection.classList.remove('hidden');
+                    managementSection.classList.add('hidden');
+                    renderQueryResults();
+                } else if (target === '添加荣誉') {
+                    addHonorSection.classList.remove('hidden');
+                    queryHonorSection.classList.add('hidden');
+                    managementSection.classList.add('hidden');
+                } else if (target === '管理') {
+                    if (!isLoggedIn) {
+                        loginModal.classList.remove('hidden');
+                    } else {
+                        addHonorSection.classList.add('hidden');
+                        queryHonorSection.classList.add('hidden');
+                        managementSection.classList.remove('hidden');
+                        renderPendingHonors();
+                        renderApprovedHonors();
+                    }
+                }
+            });
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const user = adminAccounts.find(account => account.username === username && account.password === password);
+            if (user) {
+                isLoggedIn = true;
+                currentUser = user;
+                loginModal.classList.add('hidden');
+                addHonorSection.classList.add('hidden');
+                queryHonorSection.classList.add('hidden');
+                managementSection.classList.remove('hidden');
+                renderPendingHonors();
+                renderApprovedHonors();
+            } else {
+                alert('用户名或密码错误');
+            }
+        });
+
+        addHonorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const honorName = document.getElementById('honor-name').value;
+            const honorCategory = document.getElementById('honor-category').value;
+            const name = document.getElementById('name').value;
+            const studentId = document.getElementById('student-id').value;
+            const witness = document.getElementById('witness').value;
+            const honorImage = document.getElementById('honor-image').files[0];
+            const enrollmentYear = document.getElementById('enrollment-year').value;
+
+            let imageDataUrl = '';
+            if (honorImage) {
+                const reader = new FileReader();
+                await new Promise((resolve) => {
+                    reader.onload = (event) => {
+                        imageDataUrl = event.target.result;
+                        resolve();
+                    };
+                    reader.readAsDataURL(honorImage);
+                });
+            }
+
+            pendingHonors.push({ name: honorName, category: honorCategory, personName: name, studentId: studentId, witness: witness, image: imageDataUrl, enrollmentYear: enrollmentYear });
+            saveDataToLocalStorage();
+            alert('荣誉已提交审核');
+            addHonorForm.reset();
+        });
+
+        function renderPendingHonors() {
+            reviewTable.innerHTML = '';
+            pendingHonors.forEach((honor, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.personName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.studentId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.witness}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.enrollmentYear}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button class="bg-green-600 text-white py-1 px-2 rounded-md hover:bg-green-700" onclick="approveHonor(${index})">通过</button>
+                        <button class="bg-red-600 text-white py-1 px-2 rounded-md hover:bg-red-700" onclick="rejectHonor(${index})">拒绝</button>
+                        <button class="bg-yellow-600 text-white py-1 px-2 rounded-md hover:bg-yellow-700" onclick="viewImage(${index}, true)">查看图片</button>
+                    </td>
+                `;
+                reviewTable.appendChild(row);
+            });
+        }
+
+        function renderApprovedHonors() {
+            adminTable.innerHTML = '';
+            approvedHonors.forEach((honor, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.personName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.studentId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${honor.enrollmentYear}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button class="bg-blue-600 text-white py-1 px-2 rounded-md hover:bg-blue-700" onclick="pinHonor(${index})">置顶</button>
+                        <button class="bg-red-600 text-white py-1 px-2 rounded-md hover:bg-red-700" onclick="deleteHonor(${index})">删除</button>
+                        <button class="bg-yellow-600 text-white py-1 px-2 rounded-md hover:bg-yellow-700" onclick="viewImage(${index}, false)">查看图片</button>
+                    </td>
+                `;
+                adminTable.appendChild(row);
+            });
+        }
+
+        function approveHonor(index) {
+            const approvedHonor = pendingHonors.splice(index, 1)[0];
+            approvedHonors.push(approvedHonor);
+            saveDataToLocalStorage();
+            renderPendingHonors();
+            renderApprovedHonors();
+            alert('荣誉审核通过');
+        }
+
+        function rejectHonor(index) {
+            pendingHonors.splice(index, 1);
+            saveDataToLocalStorage();
+            renderPendingHonors();
+            alert('荣誉审核拒绝');
+        }
+
+        function pinHonor(index) {
+            const pinnedHonor = approvedHonors.splice(index, 1)[0];
+            approvedHonors.unshift(pinnedHonor);
+            saveDataToLocalStorage();
+            renderApprovedHonors();
+            renderQueryResults();
+        }
+
+        function deleteHonor(index) {
+            approvedHonors.splice(index, 1);
+            saveDataToLocalStorage();
+            renderApprovedHonors();
+            renderQueryResults();
+        }
+
+        function viewImage(index, isPending) {
+            const honors = isPending ? pendingHonors : approvedHonors;
+            const honor = honors[index];
+            imageModalImg.src = honor.image;
+            imageModal.classList.remove('hidden');
+        }
+
+        queryHonorForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            renderQueryResults();
+        });
+
+        function renderQueryResults() {
+            const queryCategory = document.getElementById('query-category').value;
+            const queryEnrollmentYear = document.getElementById('query-enrollment-year').value;
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+
+            let results = [];
+            if (queryCategory === 'all' && queryEnrollmentYear === 'all') {
+                results = approvedHonors;
+            } else if (queryCategory === 'all') {
+                results = approvedHonors.filter(honor => honor.enrollmentYear === queryEnrollmentYear);
+            } else if (queryEnrollmentYear === 'all') {
+                results = approvedHonors.filter(honor => honor.category === queryCategory);
+            } else {
+                results = approvedHonors.filter(honor => honor.category === queryCategory && honor.enrollmentYear === queryEnrollmentYear);
+            }
+
+            if (searchInput) {
+                results = results.filter(honor => {
+                    return honor.name.toLowerCase().includes(searchInput) || honor.personName.toLowerCase().includes(searchInput);
+                });
+            }
+
+            queryResults.innerHTML = '';
+            if (results.length === 0) {
+                queryResults.innerHTML = '<p class="text-gray-600">未找到相关荣誉</p>';
+            } else {
+                results.forEach(honor => {
+                    const div = document.createElement('div');
+                    div.classList.add('bg-white', 'p-4', 'rounded-md', 'shadow-md', 'mb-4', 'flex', 'justify-between', 'items-center');
+
+                    const infoDiv = document.createElement('div');
+                    const nameLink = document.createElement('a');
+                    nameLink.href = '#';
+                    nameLink.textContent = honor.name;
+                    nameLink.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        imageModalImg.src = honor.image;
+                        imageModal.classList.remove('hidden');
+                    });
+                    infoDiv.appendChild(nameLink);
+                    infoDiv.innerHTML += `
+                        <p class="text-gray-600">年份: ${honor.category}</p>
+                        <p class="text-gray-600">姓名: ${honor.personName}</p>
+                        <p class="text-gray-600">学号: ${honor.studentId}</p>
+                        <p class="text-gray-600">入学年级: ${honor.enrollmentYear}</p>
+                    `;
+                    div.appendChild(infoDiv);
+
+                    const imgDiv = document.createElement('div');
+                    const smallImg = document.createElement('img');
+                    smallImg.src = honor.image;
+                    smallImg.classList.add('w-20', 'h-20', 'object-cover', 'cursor-pointer');
+                    smallImg.addEventListener('click', function () {
+                        imageModalImg.src = honor.image;
+                        imageModal.classList.remove('hidden');
+                    });
+                    imgDiv.appendChild(smallImg);
+                    div.appendChild(imgDiv);
+
+                    queryResults.appendChild(div);
+                });
+            }
+        }
+
+        imageModalClose.addEventListener('click', () => {
+            imageModal.classList.add('hidden');
+        });
+
+        addAdminButton.addEventListener('click', () => {
+            if (!currentUser.isInitial) {
+                alert('您不是初始账号');
+                return;
+            }
+            addAdminModal.classList.remove('hidden');
+        });
+
+        addAdminForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUsername = document.getElementById('new-username').value;
+            const newPassword = document.getElementById('new-password').value;
+            if (newUsername && newPassword) {
+                adminAccounts.push({ username: newUsername, password: newPassword, isInitial: false });
+                saveDataToLocalStorage();
+                addAdminModal.classList.add('hidden');
+                addAdminForm.reset();
+                alert('新管理账号添加成功');
+            } else {
+                alert('请输入用户名和密码');
+            }
+        });
+
+        deleteAdminButton.addEventListener('click', () => {
+            if (!currentUser.isInitial) {
+                alert('您不是初始账号');
+                return;
+            }
+            deleteAdminList.innerHTML = '';
+            const nonInitialAccounts = adminAccounts.filter(account => !account.isInitial);
+            if (nonInitialAccounts.length === 0) {
+                deleteAdminList.innerHTML = '<p class="text-gray-600">没有可删除的管理账号</p>';
+            } else {
+                nonInitialAccounts.forEach((account, index) => {
+                    const div = document.createElement('div');
+                    div.classList.add('flex', 'justify-between', 'items-center', 'mb-2');
+                    div.innerHTML = `
+                        <span>用户名: ${account.username}, 密码: ${account.password}</span>
+                        <button class="bg-red-600 text-white py-1 px-2 rounded-md hover:bg-red-700" onclick="deleteAdmin(${index})">删除</button>
+                    `;
+                    deleteAdminList.appendChild(div);
+                });
+            }
+            deleteAdminModal.classList.remove('hidden');
+        });
+
+        function deleteAdmin(index) {
+            const nonInitialAccounts = adminAccounts.filter(account => !account.isInitial);
+            const accountToDelete = nonInitialAccounts[index];
+            adminAccounts = adminAccounts.filter(account => account !== accountToDelete);
+            saveDataToLocalStorage();
+            deleteAdminModal.classList.add('hidden');
+            alert('管理账号删除成功');
+        }
+
+        document.getElementById('login-modal-back').addEventListener('click', () => {
+            loginModal.classList.add('hidden');
+        });
+
+        document.getElementById('add-admin-modal-back').addEventListener('click', () => {
+            addAdminModal.classList.add('hidden');
+        });
+
+        document.getElementById('delete-admin-modal-back').addEventListener('click', () => {
+            deleteAdminModal.classList.add('hidden');
+        });
+
+        logoutButton.addEventListener('click', () => {
+            isLoggedIn = false;
+            currentUser = null;
+            managementSection.classList.add('hidden');
+            addHonorSection.classList.remove('hidden');
+        });
+
+        // 页面加载时显示查询荣誉界面
+        window.onload = function () {
+            addHonorSection.classList.add('hidden');
+            queryHonorSection.classList.remove('hidden');
+            managementSection.classList.add('hidden');
+            renderQueryResults();
+        };
+    </script>
+</body>
+
+</html>
+    
